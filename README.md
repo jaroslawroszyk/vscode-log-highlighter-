@@ -46,3 +46,26 @@ todo:
 Select the highlighted word again and use:
 - `Remove Highlight` → removes just that word  
 - `Remove All Highlights` → clears all at once
+
+
+## 📦 Installation
+
+### Option 1: From the Marketplace (recommended)
+
+1. Open **Visual Studio Code**
+2. Go to **Extensions** (`Ctrl+Shift+X`)
+3. Search for `Log Highlighter`
+4. Click **Install**
+
+Or install directly from:
+<!-- 👉 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=your-publisher.log-highlighter) -->
+
+---
+
+### Option 2: Manual `.vsix` Install
+
+1. Download the `.vsix` file from the [Releases](https://github.com/your-repo/releases) tab
+2. In VS Code, press `Ctrl+Shift+P` → `Extensions: Install from VSIX...`
+3. Select the downloaded file
+
+---
