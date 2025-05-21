@@ -1,0 +1,57 @@
+{
+  "name": "log-highlighter",
+  "displayName": "log-highlighter",
+  "description": "Highlight selected words or phrases in your code with custom colors. Supports case-sensitive and case-insensitive highlighting, color picking, and persistent storage of highlights.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.highlightSelection",
+        "title": "Highlight Selection (Persistent)"
+      },
+      {
+        "command": "extension.addHighlightIgnoreCase",
+        "title": "Add Highlight (Ignore Case)"
+      },
+      {
+        "command": "extension.highlightWithCustomColor",
+        "title": "Highlight Selection With Custom Color"
+      },
+      {
+        "command": "extension.removeHighlight",
+        "title": "Remove Highlight"
+      },
+      {
+        "command": "extension.removeAllHighlights",
+        "title": "Remove All Highlights"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.100.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
