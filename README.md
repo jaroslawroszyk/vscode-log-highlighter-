@@ -58,9 +58,8 @@ Select the highlighted word again and use:
 4. Click **Install**
 
 Or install directly from:
-<!-- 👉 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=your-publisher.log-highlighter) -->
+👉 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=JaroslawRoszyk.log-highlighter-plus)
 
----
 
 ### Option 2: Manual `.vsix` Install
 
