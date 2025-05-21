@@ -39,7 +39,7 @@ Or enter your own custom hex color (like `#ff6600`).
 
 Highlighting the word `Email` in red:
 
-(![alt text](assets/red_highlight.png))
+todo:
 
 ## 🧹 Removing Highlights
 
