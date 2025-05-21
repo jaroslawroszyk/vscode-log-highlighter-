@@ -9,6 +9,7 @@
   "categories": [
     "Other"
   ],
+  "publisher": "JaroslawRoszyk",
   "repository": {
     "type": "git",
     "url": "https://github.com/jaroslawroszyk/vscode-log-highlighter-"
