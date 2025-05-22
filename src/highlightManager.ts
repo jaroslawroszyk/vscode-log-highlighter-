@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { escapeRegExp, randomColor } from './utils/utils';
 import { popularColors } from './colors';
-import * as highlightStore from './highlightStore';
+import * as highlightStore from './HighlightStore';
 
 const highlights: { [key: string]: vscode.TextEditorDecorationType } = {};
 
