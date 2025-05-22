@@ -5,12 +5,13 @@ A Visual Studio Code extension to **highlight words or phrases** in any file usi
 
 ## ✨ Features
 
-- ✅ Highlight selected text with your favorite color
-- 🧠 Optionally ignore case when matching
-- 🎨 Choose from popular colors or enter a hex code
-- 💾 Persistent highlights (saved between sessions)
-- 🧹 Remove individual highlights or all at once
-- 🔄 Automatically re-applies highlights when switching files or editing
+- ✅ Highlight selected text with persistent colors
+- 🧠 Optional case-insensitive matching
+- 🎨 Choose from popular preset colors or enter a custom hex
+- 💾 Highlights persist across VS Code sessions
+- 🧹 Remove individual or all highlights easily
+- 🔄 Auto-refresh highlights on edit or file change
+- 🖱️ Right-click context menu for quick access to highlight actions
 
 ## 🚀 Commands
 
@@ -21,6 +22,8 @@ Open Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and type:
 - `Highlight With Custom Color`
 - `Remove Highlight`
 - `Remove All Highlights`
+
+These commands also appear in a dedicated **Highlight** submenu in the right-click context menu.
 
 ## 🎨 Color Options
 
@@ -47,6 +50,8 @@ todo:
 Select the highlighted word again and use:
 - `Remove Highlight` → removes just that word  
 - `Remove All Highlights` → clears all at once
+
+These actions are available from both the Command Palette and the right-click **Highlight** submenu.
 
 
 ## 📦 Installation
