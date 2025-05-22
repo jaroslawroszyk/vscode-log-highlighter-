@@ -1,4 +1,3 @@
-// highlightStore.ts
 import { ExtensionContext } from 'vscode';
 import { Highlight } from './types';
 
