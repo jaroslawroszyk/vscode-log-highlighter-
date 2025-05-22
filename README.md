@@ -1,4 +1,5 @@
 # log-highlighter
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](#license)
 
 A Visual Studio Code extension to **highlight words or phrases** in any file using custom background colors.
 
