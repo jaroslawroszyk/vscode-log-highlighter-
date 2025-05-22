@@ -154,6 +154,28 @@ export async function handleRemoveAllHighlights(editor: vscode.TextEditor | unde
 	vscode.window.showInformationMessage('Removed all highlights');
 }
 
+export function updateHighlightContext(selection: vscode.Selection, document: vscode.TextDocument) {
+	const selectedText = document.getText(selection).trim();
+	if (!selectedText) {
+		vscode.commands.executeCommand('setContext', 'highlightPlus.isHighlighted', false);
+		return;
+	}
+
+	const highlights = getHighlights();
+	const isHighlighted = highlights.some(h => {
+		if (h.ignoreCase) {
+			return h.word.toLowerCase() === selectedText.toLowerCase();
+		}
+		return h.word === selectedText;
+	});
+
+	vscode.commands.executeCommand('setContext', 'highlightPlus.isHighlighted', isHighlighted);
+}
+
+export function getHighlights() {
+	return highlightStore.getHighlights();
+}
+
 export function disposeAll() {
 	for (const key in highlights) {
 		highlights[key].dispose();

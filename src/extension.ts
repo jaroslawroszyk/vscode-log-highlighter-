@@ -8,6 +8,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const editor = vscode.window.activeTextEditor;
 	if (editor) {
 		highlightManager.applyHighlights(editor);
+		highlightManager.updateHighlightContext(editor.selection, editor.document);
 	}
 
 	context.subscriptions.push(
@@ -41,7 +42,14 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor) {
 				highlightManager.applyHighlights(editor);
+				highlightManager.updateHighlightContext(editor.selection, editor.document);
 			}
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.window.onDidChangeTextEditorSelection(event => {
+			highlightManager.updateHighlightContext(event.selections[0], event.textEditor.document);
 		})
 	);
 }
