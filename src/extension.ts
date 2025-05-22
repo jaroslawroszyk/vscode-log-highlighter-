@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { escapeRegExp, randomColor } from './utils/utils';
 
 interface Highlight {
 	word: string;
@@ -219,11 +220,11 @@ async function handleRemoveAllHighlights(context: vscode.ExtensionContext, edito
 	vscode.window.showInformationMessage('Removed all highlights');
 }
 
-function randomColor(): string {
-	const colors = ['#ffff99', '#ffcccb', '#ccffcc', '#ccccff', '#ffcc99'];
-	return colors[Math.floor(Math.random() * colors.length)];
-}
+// function randomColor(): string {
+// 	const colors = ['#ffff99', '#ffcccb', '#ccffcc', '#ccccff', '#ffcc99'];
+// 	return colors[Math.floor(Math.random() * colors.length)];
+// }
 
-function escapeRegExp(string: string): string {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+// function escapeRegExp(string: string): string {
+// 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// }
