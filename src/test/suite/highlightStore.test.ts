@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { ExtensionContext } from 'vscode';
-import { Highlight } from '../../types';
-import { HighlightStore } from '../../highlightStore';
+import { Highlight } from '../../core/types';
+import { HighlightStore } from '../../core/highlightStore';
 
 const createMockContext = (): ExtensionContext => ({
   globalState: {

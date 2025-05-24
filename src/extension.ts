@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { HighlightStore } from './highlightStore';
-import { HighlightManager } from './highlightManager';
+import { HighlightStore } from './core/highlightStore';
+import { HighlightManager } from './core/highlightManager';
 
 export async function activate(context: vscode.ExtensionContext) {
 	console.log('Extension "log-highlighter" is now active!');
