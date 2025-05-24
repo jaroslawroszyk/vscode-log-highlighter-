@@ -1,38 +1,44 @@
 import { ExtensionContext } from 'vscode';
 import { Highlight } from './types';
 
-let storedHighlights: Highlight[] = [];
-let context: ExtensionContext | null = null;
+export class HighlightStore {
+	private storedHighlights: Highlight[] = [];
+	private context: ExtensionContext;
+	private storageKey = 'storedHighlights';
 
-export function initHighlightStore(ctx: ExtensionContext) {
-	context = ctx;
-	storedHighlights = ctx.globalState.get<Highlight[]>('storedHighlights', []);
-}
-
-export function getHighlights(): Highlight[] {
-	return storedHighlights;
-}
-
-export async function addHighlight(h: Highlight) {
-	storedHighlights.push(h);
-	await save();
-}
-
-export async function removeHighlight(predicate: (h: Highlight) => boolean) {
-	const idx = storedHighlights.findIndex(predicate);
-	if (idx >= 0) {
-		storedHighlights.splice(idx, 1);
-		await save();
+	constructor(context: ExtensionContext) {
+		this.context = context;
 	}
-}
 
-export async function clearHighlights() {
-	storedHighlights = [];
-	await save();
-}
+	async init(): Promise<void> {
+		this.storedHighlights = this.context.globalState.get<Highlight[]>(this.storageKey, []);
+	}
 
-async function save() {
-	if (context) {
-		await context.globalState.update('storedHighlights', storedHighlights);
+	getHighlights(): Highlight[] {
+		return [...this.storedHighlights];
+	}
+
+	async addHighlight(h: Highlight): Promise<void> {
+		this.storedHighlights.push(h);
+		await this.save();
+	}
+
+	async removeHighlight(predicate: (h: Highlight) => boolean): Promise<void> {
+		const originalLength = this.storedHighlights.length;
+		this.storedHighlights = this.storedHighlights.filter(h => !predicate(h));
+		if (this.storedHighlights.length !== originalLength) {
+			await this.save();
+		}
+	}
+
+	async clearHighlights(): Promise<void> {
+		if (this.storedHighlights.length > 0) {
+			this.storedHighlights = [];
+			await this.save();
+		}
+	}
+
+	private async save(): Promise<void> {
+		await this.context.globalState.update(this.storageKey, this.storedHighlights);
 	}
 }

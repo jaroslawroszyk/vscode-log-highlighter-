@@ -1,183 +1,165 @@
 import * as vscode from 'vscode';
 import { escapeRegExp, randomColor } from './utils/utils';
 import { popularColors } from './colors';
-import * as highlightStore from './HighlightStore';
+import { HighlightStore } from './highlightStore';
+import { Highlight } from './types';
 
-const highlights: { [key: string]: vscode.TextEditorDecorationType } = {};
+export class HighlightManager {
+	private highlightStore: HighlightStore;
+	private decorations: Map<string, vscode.TextEditorDecorationType> = new Map();
 
-export function init(context: vscode.ExtensionContext) {
-	highlightStore.initHighlightStore(context);
-}
+	constructor(highlightStore: HighlightStore) {
+		this.highlightStore = highlightStore;
+	}
 
-export async function handleAddHighlight(
-	editor: vscode.TextEditor | undefined,
-	ignoreCase: boolean,
-	customColor: boolean
-) {
-	try {
+	async init() {
+		await this.highlightStore.init();
+	}
+
+	async handleAddHighlight(editor: vscode.TextEditor | undefined, ignoreCase: boolean, customColor: boolean) {
 		if (!editor) {
 			vscode.window.showInformationMessage('No active editor');
 			return;
 		}
 
-		const selection = editor.selection;
-		const selectedTextRaw = editor.document.getText(selection).trim();
+		const selectedTextRaw = editor.document.getText(editor.selection).trim();
 		if (!selectedTextRaw) {
 			vscode.window.showInformationMessage('No text selected');
 			return;
 		}
 
-		const highlightsList = highlightStore.getHighlights();
-		const exists = highlightsList.some(h =>
-			h.word === selectedTextRaw && h.ignoreCase === ignoreCase
-		);
+		const exists = this.highlightStore.getHighlights()
+			.some(h => h.word === selectedTextRaw && h.ignoreCase === ignoreCase);
+
 		if (exists) {
-			vscode.window.showInformationMessage(`"${selectedTextRaw}" is already highlighted with ignoreCase=${ignoreCase}`);
+			vscode.window.showInformationMessage(`"${selectedTextRaw}" is already highlighted (ignoreCase=${ignoreCase})`);
 			return;
 		}
 
 		let bgColor = randomColor();
+
 		if (customColor) {
 			const picked = await vscode.window.showQuickPick(
-				popularColors.map(c => c.label).concat(['Custom color (hex)']),
-				{ placeHolder: 'Select a highlight color or pick "Custom color (hex)" to enter manually' }
+				[...popularColors.map(c => c.label), 'Custom color (hex)'],
+				{ placeHolder: 'Select a highlight color or pick "Custom color (hex)"' }
 			);
 
-			if (!picked) { return; }
+			if (!picked) return;
 
 			if (picked === 'Custom color (hex)') {
 				const inputColor = await vscode.window.showInputBox({
 					prompt: 'Enter a hex color code (e.g. #ff0000)',
-					validateInput: (text) => {
-						if (text && !/^#([0-9A-Fa-f]{6})$/.test(text)) {
-							return 'Please enter a valid hex color like #ff0000';
-						}
-						return null;
-					}
+					validateInput: text => text && !/^#([0-9A-Fa-f]{6})$/.test(text)
+						? 'Please enter a valid hex color like #ff0000' : null
 				});
-				if (!inputColor) { return; }
+				if (!inputColor) return;
 				bgColor = inputColor;
 			} else {
 				const found = popularColors.find(c => c.label === picked);
-				if (found) { bgColor = found.color; }
+				if (found) bgColor = found.color;
 			}
 		}
 
-		await highlightStore.addHighlight({ word: selectedTextRaw, color: bgColor, ignoreCase });
-		applyHighlights(editor);
-
-		vscode.window.showInformationMessage(`Highlighted: "${selectedTextRaw}"${ignoreCase ? ' (ignore case)' : ''} with color ${bgColor}`);
-	} catch (err) {
-		console.error(err);
-		vscode.window.showErrorMessage(`Failed to add highlight: ${(err as Error).message}`);
-	}
-}
-
-export function applyHighlights(editor: vscode.TextEditor) {
-	for (const key in highlights) {
-		highlights[key].dispose();
-		delete highlights[key];
+		await this.highlightStore.addHighlight({ word: selectedTextRaw, color: bgColor, ignoreCase });
+		this.applyHighlights(editor);
+		vscode.window.showInformationMessage(`Highlighted "${selectedTextRaw}"${ignoreCase ? ' (ignore case)' : ''} with ${bgColor}`);
 	}
 
-	const text = editor.document.getText();
-	const highlightsList = highlightStore.getHighlights();
+	applyHighlights(editor: vscode.TextEditor) {
+		// Dispose old decorations
+		this.decorations.forEach(d => d.dispose());
+		this.decorations.clear();
 
-	for (const highlight of highlightsList) {
-		const flags = highlight.ignoreCase ? 'gi' : 'g';
-		const regex = new RegExp(`\\b${escapeRegExp(highlight.word)}\\b`, flags);
+		const text = editor.document.getText();
 
-		const ranges: vscode.Range[] = [];
-		let match;
-		while ((match = regex.exec(text))) {
-			const startPos = editor.document.positionAt(match.index);
-			const endPos = editor.document.positionAt(match.index + match[0].length);
-			ranges.push(new vscode.Range(startPos, endPos));
+		for (const highlight of this.highlightStore.getHighlights()) {
+			const flags = highlight.ignoreCase ? 'gi' : 'g';
+			const regex = new RegExp(`\\b${escapeRegExp(highlight.word)}\\b`, flags);
+
+			const ranges: vscode.Range[] = [];
+			let match;
+			while ((match = regex.exec(text)) !== null) {
+				const start = editor.document.positionAt(match.index);
+				const end = editor.document.positionAt(match.index + match[0].length);
+				ranges.push(new vscode.Range(start, end));
+			}
+
+			const decorationType = vscode.window.createTextEditorDecorationType({
+				backgroundColor: highlight.color,
+				color: '#000000',
+				borderRadius: '2px',
+				fontWeight: 'bold',
+			});
+
+			const key = highlight.word + (highlight.ignoreCase ? '_i' : '');
+			this.decorations.set(key, decorationType);
+			editor.setDecorations(decorationType, ranges);
+		}
+	}
+
+	async handleRemoveHighlight(editor: vscode.TextEditor | undefined) {
+		if (!editor) {
+			vscode.window.showInformationMessage('No active editor');
+			return;
 		}
 
-		const decorationType = vscode.window.createTextEditorDecorationType({
-			backgroundColor: highlight.color,
-			color: '#000000',
-			borderRadius: '2px',
-			fontWeight: 'bold'
-		});
+		const selectedTextRaw = editor.document.getText(editor.selection).trim();
+		if (!selectedTextRaw) {
+			vscode.window.showInformationMessage('No text selected');
+			return;
+		}
+
+		const highlights = this.highlightStore.getHighlights();
+		const highlight = highlights.find(h => h.word === selectedTextRaw);
+
+		if (!highlight) {
+			vscode.window.showInformationMessage(`No highlight found for "${selectedTextRaw}"`);
+			return;
+		}
+
+		await this.highlightStore.removeHighlight(h => h.word === selectedTextRaw);
 
 		const key = highlight.word + (highlight.ignoreCase ? '_i' : '');
-		highlights[key] = decorationType;
-		editor.setDecorations(decorationType, ranges);
-	}
-}
-
-export async function handleRemoveHighlight(editor: vscode.TextEditor | undefined) {
-	if (!editor) {
-		vscode.window.showInformationMessage('No active editor');
-		return;
-	}
-
-	const selection = editor.selection;
-	const selectedTextRaw = editor.document.getText(selection).trim();
-	if (!selectedTextRaw) {
-		vscode.window.showInformationMessage('No text selected');
-		return;
-	}
-
-	const highlightsList = highlightStore.getHighlights();
-	const idx = highlightsList.findIndex(h => h.word === selectedTextRaw);
-	if (idx === -1) {
-		vscode.window.showInformationMessage(`No highlight found for "${selectedTextRaw}"`);
-		return;
-	}
-
-	const highlight = highlightsList[idx];
-	const key = highlight.word + (highlight.ignoreCase ? '_i' : '');
-
-	await highlightStore.removeHighlight(h => h.word === selectedTextRaw);
-	if (highlights[key]) {
-		highlights[key].dispose();
-		delete highlights[key];
-	}
-
-	applyHighlights(editor);
-
-	vscode.window.showInformationMessage(`Removed highlight: "${selectedTextRaw}"`);
-}
-
-export async function handleRemoveAllHighlights(editor: vscode.TextEditor | undefined) {
-	for (const key in highlights) {
-		highlights[key].dispose();
-		delete highlights[key];
-	}
-
-	await highlightStore.clearHighlights();
-
-	if (editor) { applyHighlights(editor); }
-
-	vscode.window.showInformationMessage('Removed all highlights');
-}
-
-export function updateHighlightContext(selection: vscode.Selection, document: vscode.TextDocument) {
-	const selectedText = document.getText(selection).trim();
-	if (!selectedText) {
-		vscode.commands.executeCommand('setContext', 'highlightPlus.isHighlighted', false);
-		return;
-	}
-
-	const highlights = getHighlights();
-	const isHighlighted = highlights.some(h => {
-		if (h.ignoreCase) {
-			return h.word.toLowerCase() === selectedText.toLowerCase();
+		const decoration = this.decorations.get(key);
+		if (decoration) {
+			decoration.dispose();
+			this.decorations.delete(key);
 		}
-		return h.word === selectedText;
-	});
 
-	vscode.commands.executeCommand('setContext', 'highlightPlus.isHighlighted', isHighlighted);
-}
+		this.applyHighlights(editor);
+		vscode.window.showInformationMessage(`Removed highlight: "${selectedTextRaw}"`);
+	}
 
-export function getHighlights() {
-	return highlightStore.getHighlights();
-}
+	async handleRemoveAllHighlights(editor: vscode.TextEditor | undefined) {
+		this.decorations.forEach(d => d.dispose());
+		this.decorations.clear();
 
-export function disposeAll() {
-	for (const key in highlights) {
-		highlights[key].dispose();
+		await this.highlightStore.clearHighlights();
+
+		if (editor) this.applyHighlights(editor);
+
+		vscode.window.showInformationMessage('Removed all highlights');
+	}
+
+	updateHighlightContext(selection: vscode.Selection, document: vscode.TextDocument) {
+		const selectedText = document.getText(selection).trim();
+		if (!selectedText) {
+			vscode.commands.executeCommand('setContext', 'highlightPlus.isHighlighted', false);
+			return;
+		}
+
+		const isHighlighted = this.highlightStore.getHighlights().some(h => {
+			if (h.ignoreCase) {
+				return h.word.toLowerCase() === selectedText.toLowerCase();
+			}
+			return h.word === selectedText;
+		});
+
+		vscode.commands.executeCommand('setContext', 'highlightPlus.isHighlighted', isHighlighted);
+	}
+
+	disposeAll() {
+		this.decorations.forEach(d => d.dispose());
+		this.decorations.clear();
 	}
 }
