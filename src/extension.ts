@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { HighlightStore } from './core/highlightStore';
 import { HighlightManager } from './core/highlightManager';
+import { CommandRegistrator } from './commands/CommandRegistrator';
 
 export async function activate(context: vscode.ExtensionContext) {
 	console.log('Extension "log-highlighter" is now active!');
@@ -17,23 +18,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		highlightManager.updateHighlightContext(editor.selection, editor.document);
 	}
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand('extension.highlightSelection', () =>
-			highlightManager.handleAddHighlight(vscode.window.activeTextEditor, false, false)
-		),
-		vscode.commands.registerCommand('extension.addHighlightIgnoreCase', () =>
-			highlightManager.handleAddHighlight(vscode.window.activeTextEditor, true, false)
-		),
-		vscode.commands.registerCommand('extension.highlightWithCustomColor', () =>
-			highlightManager.handleAddHighlight(vscode.window.activeTextEditor, false, true)
-		),
-		vscode.commands.registerCommand('extension.removeHighlight', () =>
-			highlightManager.handleRemoveHighlight(vscode.window.activeTextEditor)
-		),
-		vscode.commands.registerCommand('extension.removeAllHighlights', () =>
-			highlightManager.handleRemoveAllHighlights(vscode.window.activeTextEditor)
-		)
-	);
+	const commandRegistrar = new CommandRegistrator(context, highlightManager);
+	commandRegistrar.registerAll();
 
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeTextDocument(e => {
@@ -57,5 +43,4 @@ export async function activate(context: vscode.ExtensionContext) {
 	);
 }
 
-export function deactivate() {
-}
+export function deactivate() { }
