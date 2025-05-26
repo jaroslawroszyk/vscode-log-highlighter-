@@ -2,9 +2,9 @@
   "name": "log-highlighter-plus",
   "displayName": "log-highlighter-plus",
   "description": "Highlight selected words or phrases in your code with custom colors. Supports case-sensitive and case-insensitive highlighting, color picking, and persistent storage of highlights.",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "engines": {
-    "vscode": "^1.100.0"
+    "vscode": "^1.80.0"
   },
   "categories": [
     "Other"
@@ -89,14 +89,16 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/chai": "^5.2.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/sinon": "^17.0.4",
-    "@types/vscode": "^1.100.0",
+    "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.5.2",
+    "chai": "^5.2.0",
     "eslint": "^9.25.1",
     "sinon": "^20.0.0",
     "typescript": "^5.8.3"

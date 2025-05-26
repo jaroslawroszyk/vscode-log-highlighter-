@@ -1,43 +1,61 @@
 import * as assert from 'assert';
 import { ExtensionContext } from 'vscode';
-import { Highlight } from '../../types';
-import * as highlightStore from '../../HighlightStore';
+import { Highlight } from '../../core/types';
+import { HighlightStore } from '../../core/highlightStore';
 
-const mockContext = {
+const createMockContext = (): ExtensionContext => ({
   globalState: {
-    get: <T>(key: string, defaultValue: T): T => defaultValue,
-    update: async () => undefined
+    storage: new Map<string, any>(),
+    get<T>(key: string, defaultValue: T): T {
+      if (this.storage.has(key)) {
+        return this.storage.get(key);
+      }
+      return defaultValue;
+    },
+    update(key: string, value: any): Promise<void> {
+      this.storage.set(key, value);
+      return Promise.resolve();
+    }
   }
-} as unknown as ExtensionContext;
+} as unknown as ExtensionContext);
 
-suite('Highlight Store Tests', () => {
+suite('HighlightStore Class Tests', () => {
+  let store: HighlightStore;
+
   const testHighlight: Highlight = {
     word: 'test',
     color: '#ff0000',
     ignoreCase: true
   };
 
-  test('initialize store', () => {
-    highlightStore.initHighlightStore(mockContext);
-    assert.deepStrictEqual(highlightStore.getHighlights(), []);
+  setup(async () => {
+    const mockContext = createMockContext();
+    store = new HighlightStore(mockContext);
+    await store.init();
   });
 
-  test('add highlight', async () => {
-    await highlightStore.addHighlight(testHighlight);
-    const highlights = highlightStore.getHighlights();
+  test('initial state is empty', () => {
+    assert.deepStrictEqual(store.getHighlights(), []);
+  });
+
+  test('addHighlight adds highlight', async () => {
+    await store.addHighlight(testHighlight);
+    const highlights = store.getHighlights();
     assert.strictEqual(highlights.length, 1);
     assert.deepStrictEqual(highlights[0], testHighlight);
   });
 
-  test('remove highlight', async () => {
-    await highlightStore.removeHighlight(h => h.word === 'test');
-    const highlights = highlightStore.getHighlights();
+  test('removeHighlight removes correct highlight', async () => {
+    await store.addHighlight(testHighlight);
+    await store.removeHighlight(h => h.word === 'test');
+    const highlights = store.getHighlights();
     assert.strictEqual(highlights.length, 0);
   });
 
-  test('clear highlights', async () => {
-    await highlightStore.addHighlight(testHighlight);
-    await highlightStore.clearHighlights();
-    assert.strictEqual(highlightStore.getHighlights().length, 0);
+  test('clearHighlights clears all highlights', async () => {
+    await store.addHighlight(testHighlight);
+    await store.clearHighlights();
+    const highlights = store.getHighlights();
+    assert.strictEqual(highlights.length, 0);
   });
 });

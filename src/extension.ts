@@ -1,9 +1,17 @@
 import * as vscode from 'vscode';
-import * as highlightManager from './highlightManager';
+import { HighlightStore } from './core/highlightStore';
+import { HighlightManager } from './core/highlightManager';
+import { CommandRegistrator } from './commands/CommandRegistrator';
+import { EventRegistrator } from './events/EventRegistrator';
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	console.log('Extension "log-highlighter" is now active!');
-	highlightManager.init(context);
+
+	const highlightStore = new HighlightStore(context);
+	await highlightStore.init();
+
+	const highlightManager = new HighlightManager(highlightStore);
+	await highlightManager.init();
 
 	const editor = vscode.window.activeTextEditor;
 	if (editor) {
@@ -11,49 +19,8 @@ export function activate(context: vscode.ExtensionContext) {
 		highlightManager.updateHighlightContext(editor.selection, editor.document);
 	}
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand('extension.highlightSelection', () => {
-			highlightManager.handleAddHighlight(vscode.window.activeTextEditor, false, false);
-		}),
-		vscode.commands.registerCommand('extension.addHighlightIgnoreCase', () => {
-			highlightManager.handleAddHighlight(vscode.window.activeTextEditor, true, false);
-		}),
-		vscode.commands.registerCommand('extension.highlightWithCustomColor', () => {
-			highlightManager.handleAddHighlight(vscode.window.activeTextEditor, false, true);
-		}),
-		vscode.commands.registerCommand('extension.removeHighlight', () => {
-			highlightManager.handleRemoveHighlight(vscode.window.activeTextEditor);
-		}),
-		vscode.commands.registerCommand('extension.removeAllHighlights', () => {
-			highlightManager.handleRemoveAllHighlights(vscode.window.activeTextEditor);
-		})
-	);
-
-	context.subscriptions.push(
-		vscode.workspace.onDidChangeTextDocument(event => {
-			const activeEditor = vscode.window.activeTextEditor;
-			if (activeEditor && event.document === activeEditor.document) {
-				highlightManager.applyHighlights(activeEditor);
-			}
-		})
-	);
-
-	context.subscriptions.push(
-		vscode.window.onDidChangeActiveTextEditor(editor => {
-			if (editor) {
-				highlightManager.applyHighlights(editor);
-				highlightManager.updateHighlightContext(editor.selection, editor.document);
-			}
-		})
-	);
-
-	context.subscriptions.push(
-		vscode.window.onDidChangeTextEditorSelection(event => {
-			highlightManager.updateHighlightContext(event.selections[0], event.textEditor.document);
-		})
-	);
+	new CommandRegistrator(context, highlightManager).registerAll();
+	new EventRegistrator(context, highlightManager).registerAll();
 }
 
-export function deactivate() {
-	highlightManager.disposeAll();
-}
+export function deactivate() { }
