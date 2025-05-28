@@ -1,4 +1,9 @@
-# log-highlighter
+<div align="left">
+  <img title="plan_ahead" src="./assets/log-highlighter-logo2.png" align="left" width="100" style="padding-right: 0.5ch">
+  <span style="font-size: 2em; font-weight: bold; line-height: 100px;">log-highlighter-plus</span>
+</div>
+
+
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](#license)
 
 A Visual Studio Code extension to **highlight words or phrases** in any file using custom background colors.
