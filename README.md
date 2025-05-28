@@ -79,3 +79,8 @@ Or install directly from:
 3. Select the downloaded file
 
 ---
+
+---
+
+Made with ❤️ by [@JaroslawRoszyk](https://github.com/JaroslawRoszyk)  
+Feel free to open issues or contribute!
