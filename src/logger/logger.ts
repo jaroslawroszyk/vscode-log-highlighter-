@@ -11,6 +11,18 @@ export function log(msg: string): void {
 	outputChannel?.appendLine(msg);
 }
 
+export function info(msg: string): void {
+	outputChannel?.appendLine(`[INFO] ${msg}`);
+}
+
+export function warn(msg: string): void {
+	outputChannel?.appendLine(`[WARN] ${msg}`);
+}
+
+export function err(msg: string): void {
+	outputChannel?.appendLine(`[ERROR] ${msg}`);
+}
+
 export function disposeLogger(): void {
 	outputChannel?.dispose();
 }
