@@ -2,7 +2,7 @@
   "name": "log-highlighter-plus",
   "displayName": "log-highlighter-plus",
   "description": "Highlight selected words or phrases in your code with custom colors. Supports case-sensitive and case-insensitive highlighting, color picking, and persistent storage of highlights.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "icon": "assets/log-highlighter-logo2.png",
   "engines": {
     "vscode": "^1.80.0"
