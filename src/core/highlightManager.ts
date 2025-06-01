@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { escapeRegExp, randomColor } from '../utils/utils';
 import { popularColors } from '../colors/colors';
 import { HighlightStore } from './highlightStore';
+import { log, err, info, warn } from '../logger/logger';
 
 export class HighlightManager {
 	private static readonly MSG_NO_ACTIVE_EDITOR = 'No active editor';
@@ -18,7 +19,7 @@ export class HighlightManager {
 		try {
 			await this.highlightStore.init();
 		} catch (error) {
-			console.error('Failed to initialize HighlightStore', error);
+			err(`Failed to initialize HighlightStore: "${error}"`);
 		}
 	}
 
@@ -30,12 +31,14 @@ export class HighlightManager {
 		try {
 			if (!editor) {
 				vscode.window.showInformationMessage(HighlightManager.MSG_NO_ACTIVE_EDITOR);
+				warn(HighlightManager.MSG_NO_ACTIVE_EDITOR);
 				return;
 			}
 
 			const selectedTextRaw = editor.document.getText(editor.selection).trim();
 			if (!selectedTextRaw) {
 				vscode.window.showInformationMessage(HighlightManager.MSG_NO_TEXT_SELECTED);
+				warn(HighlightManager.MSG_NO_TEXT_SELECTED);
 				return;
 			}
 
@@ -46,6 +49,7 @@ export class HighlightManager {
 				vscode.window.showInformationMessage(
 					`"${selectedTextRaw}" is already highlighted (ignoreCase=${ignoreCase})`
 				);
+				info(`"${selectedTextRaw}" is already highlighted (ignoreCase=${ignoreCase})`);
 				return;
 			}
 
@@ -77,9 +81,10 @@ export class HighlightManager {
 			this.applyHighlights(editor);
 
 			vscode.window.showInformationMessage(`Highlighted "${selectedTextRaw}"${ignoreCase ? ' (ignore case)' : ''} with ${bgColor}`);
+			info(`Highlighted "${selectedTextRaw}"${ignoreCase ? ' (ignore case)' : ''} with ${bgColor}`);
 
 		} catch (error) {
-			console.error('Error in handleAddHighlight:', error);
+			err(`Error in handleAddHighlight: "${error}"`);
 			vscode.window.showErrorMessage('Failed to add highlight. See console for details.');
 		}
 	}
@@ -137,6 +142,7 @@ export class HighlightManager {
 
 			if (!highlight) {
 				vscode.window.showInformationMessage(`No highlight found for "${selectedTextRaw}"`);
+				log(`No highlight found for "${selectedTextRaw}"`);
 				return;
 			}
 
@@ -150,11 +156,13 @@ export class HighlightManager {
 			}
 
 			this.applyHighlights(editor);
+			info(`Removed highlight: "${selectedTextRaw}"`);
+
 			vscode.window.showInformationMessage(`Removed highlight: "${selectedTextRaw}"`);
 
 		} catch (error) {
-			console.error('Error in handleRemoveHighlight:', error);
 			vscode.window.showErrorMessage('Failed to remove highlight. See console for details.');
+			err(`Error in handleRemoveHighlight: "${error}"`);
 		}
 	}
 
@@ -168,9 +176,9 @@ export class HighlightManager {
 			if (editor) { this.applyHighlights(editor); }
 
 			vscode.window.showInformationMessage('Removed all highlights');
-
+			log('Removed all highlights');
 		} catch (error) {
-			console.error('Error in handleRemoveAllHighlights:', error);
+			err(`Error in handleRemoveAllHighlights: "${error}"`);
 			vscode.window.showErrorMessage('Failed to remove all highlights. See console for details.');
 		}
 	}
