@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { escapeRegExp, randomColor } from '../utils/utils';
 import { popularColors } from '../colors/colors';
 import { HighlightStore } from './highlightStore';
+import {log } from '../logger/logger';
 
 export class HighlightManager {
 	private static readonly MSG_NO_ACTIVE_EDITOR = 'No active editor';
@@ -150,6 +151,8 @@ export class HighlightManager {
 			}
 
 			this.applyHighlights(editor);
+			log(`Removed highlight: "${selectedTextRaw}"`);
+			
 			vscode.window.showInformationMessage(`Removed highlight: "${selectedTextRaw}"`);
 
 		} catch (error) {
@@ -168,8 +171,9 @@ export class HighlightManager {
 			if (editor) { this.applyHighlights(editor); }
 
 			vscode.window.showInformationMessage('Removed all highlights');
-
+			log('Removed all highlights');
 		} catch (error) {
+			log(`Error in handleRemoveAllHighlights: "${error}"`);
 			console.error('Error in handleRemoveAllHighlights:', error);
 			vscode.window.showErrorMessage('Failed to remove all highlights. See console for details.');
 		}
