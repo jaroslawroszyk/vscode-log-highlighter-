@@ -58,6 +58,9 @@ Select the highlighted word again and use:
 
 These actions are available from both the Command Palette and the right-click **Highlight** submenu.
 
+## 📝 Logging (Dev Info)
+
+Internally, log messages (e.g., actions, errors) are output to a dedicated Output Channel for debugging and diagnostics.
 
 ## 📦 Installation
 
